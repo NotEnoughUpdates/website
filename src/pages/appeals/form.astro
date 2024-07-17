@@ -1,0 +1,102 @@
+---
+import Layout from "../../layouts/Layout.astro";
+
+let type = null;
+let prefilledData = {};
+let error = null;
+let discordState = null;
+
+if (Astro.request.method === "POST") {
+	const data = Object.fromEntries(await Astro.request.formData());
+	prefilledData = data;
+	// Validate data
+	if (data.punishmentType !== "channelBlock" && "blockedChannel" in data) {
+		error = "You cannot have a blocked channel response for a non-channel-block appeal";
+	}
+	// Redirect to discord if no error
+	if (error === null) discordState = btoa(JSON.stringify(data));
+} else {
+	type = Astro.url.searchParams.get("type");
+}
+---
+
+{type !== null && !["ban", "mute", "block"].includes(type) ? <meta http-equiv="refresh" content={`0; url=/`} /> : null}
+{
+	discordState !== null ? (
+		<meta
+			http-equiv="refresh"
+			content={`0; url=https://discord.com/oauth2/authorize?client_id=${import.meta.env.CLIENT_ID}&response_type=code&redirect_uri=http%3A%2F%2F${encodeURIComponent(import.meta.env.REDIRECT_HOST)}%2Fappeals%2Foauth2-callback&scope=identify&state=${discordState}`}
+		/>
+	) : null
+}
+
+<Layout title="Moulberry's bush">
+	<main>
+		<h1>Appeal form</h1>
+		<form method="POST">
+			<label>
+				What type of punishment are you appealing?
+				<br />
+				<select name="punishmentType" required>
+					<option value="ban" {...type === "ban" ? { selected: true } : { disabled: true }}>Ban</option>
+					<option value="mute" {...type === "mute" ? { selected: true } : { disabled: true }}>Mute</option>
+					<option value="channelBlock" {...type === "block" ? { selected: true } : { disabled: true }}
+						>Channel Block</option
+					>
+				</select>
+			</label><br />
+
+			{
+				type === "block" ? (
+					<>
+						<label>
+							What channel were you blocked from?
+							<br />
+							#<input name="blockedChannel" type="text" placeholder="neu-suggestions" required />
+						</label>
+						<br />
+					</>
+				) : null
+			}
+
+			<label>
+				Why were you {type === "ban" ? "banned" : type === "mute" ? "muted" : "blocked from this channel"}?
+				<br />
+				<textarea name="punishmentReason" required></textarea>
+			</label><br />
+
+			<label>
+				Do you believe this punishment was fair?
+				<br />
+				<textarea name="fairness" required></textarea>
+			</label><br />
+
+			<label>
+				Why should we reverse your {type === "ban" ? "ban" : type === "mute" ? "mute" : "channel block"}?
+				<br />
+				<textarea name="reasoning" required></textarea>
+			</label><br />
+
+			<button>Submit by logging in with discord</button>
+		</form>
+	</main>
+</Layout>
+
+<style>
+	main {
+		margin: auto;
+		padding: 1rem;
+		width: 800px;
+		max-width: calc(100% - 2rem);
+		color: white;
+		font-size: 20px;
+		line-height: 1.6;
+	}
+	h1 {
+		font-size: 4rem;
+		font-weight: 700;
+		line-height: 1;
+		text-align: center;
+		margin-bottom: 1em;
+	}
+</style>
