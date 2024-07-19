@@ -1029,6 +1029,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sapphire/result@npm:^2.6.6":
+  version: 2.6.6
+  resolution: "@sapphire/result@npm:2.6.6"
+  checksum: 10c0/022d5f4d6b084f6ef7384453773d74116c00bbdbc7eeeed85b4b205a765ac158c2fad7fc8ecaabc19976cc40f01a54de1822f0b3f486ad27e134177ed8eb878a
+  languageName: node
+  linkType: hard
+
 "@shikijs/core@npm:1.10.3":
   version: 1.10.3
   resolution: "@shikijs/core@npm:1.10.3"
@@ -1350,6 +1357,7 @@ __metadata:
   resolution: "appeals@workspace:."
   dependencies:
     "@astrojs/check": "npm:^0.8.1"
+    "@sapphire/result": "npm:^2.6.6"
     astro: "npm:^4.11.5"
     prettier: "npm:^3.3.3"
     prettier-plugin-astro: "npm:^0.14.1"

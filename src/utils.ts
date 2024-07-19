@@ -1,28 +1,54 @@
-import { z } from "zod";
+import { err, Result } from "@sapphire/result";
+import { z, ZodError } from "zod";
 
 export function validateForm(data: unknown) {
-	try {
+	return Result.from(() => {
+		const base = {
+			punishmentReason: z.string(),
+			fairness: z.string(),
+			reasoning: z.string()
+		};
 		const schema = z.union([
 			z
 				.object({
-					punishmentType: z.enum(["ban", "mute"]),
-					punishmentReason: z.string(),
-					fairness: z.string(),
-					reasoning: z.string()
+					punishmentType: z.union([
+						z.literal("ban").transform(() => "Ban" as const),
+						z.literal("mute").transform(() => "Mute" as const)
+					])
 				})
-				.strict(),
+				.extend(base),
 			z
 				.object({
-					punishmentType: z.literal("channelBlock"),
-					blockedChannel: z.string(),
-					punishmentReason: z.string(),
-					fairness: z.string(),
-					reasoning: z.string()
+					punishmentType: z.literal("channelBlock").transform(() => "Channel Block" as const),
+					blockedChannel: z
+						.string({
+							errorMap: (i, ctx) => ({
+								message:
+									i.code === "invalid_string" && i.validation === "regex" ? "Invalid channel name" : ctx.defaultError
+							})
+						})
+						.regex(/^[\w-]{1,100}$/)
 				})
-				.strict()
+				.extend(base),
+			z
+				.object({
+					punishmentType: z.literal("role").transform(() => "Punishment Role" as const),
+					role: z
+						.enum([
+							"Limited Server Access",
+							"No Files",
+							"No Reactions",
+							"No Links",
+							"No Giveaways",
+							"No Bots",
+							"No Threads"
+						])
+						.transform(v => `@${v}` as const)
+				})
+				.extend(base)
 		]);
-		return schema.parse(data);
-	} catch {
-		return null;
-	}
+		const parsed = schema.safeParse(data);
+		if (parsed.success === true) return parsed.data;
+		else return err(parsed.error); // Necessary for allowing TS to infer the error type without having to manually type the success case
+	});
 }

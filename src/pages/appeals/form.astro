@@ -1,18 +1,23 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import { validateForm } from "../../utils";
 
-let type = null;
-let prefilledData = {};
-let error = null;
-let discordState = null;
+let type: string | null = null;
+let error: string | null = null;
+let discordState: string | null = null;
 
 if (Astro.request.method === "POST") {
 	const data = Object.fromEntries(await Astro.request.formData());
-	prefilledData = data;
+	if (typeof data.punishmentType === "string") type = data.punishmentType;
 	// Validate data
-	if (data.punishmentType !== "channelBlock" && "blockedChannel" in data) {
-		error = "You cannot have a blocked channel response for a non-channel-block appeal";
-	}
+	const validated = validateForm(data);
+	if (validated.isErr())
+		error = validated
+			.mapErr(zodError => {
+				const formatted = zodError.flatten();
+				return `Validation error(s):${formatted.formErrors.map(formError => `\n- ${formError}`)}${Object.entries(formatted.fieldErrors).map(([key, fieldErrors]) => fieldErrors.map(fieldError => `\n- Error in ${key}: ${fieldError}`))}`;
+			})
+			.unwrapErr();
 	// Redirect to discord if no error
 	if (error === null) discordState = btoa(JSON.stringify(data));
 } else {
@@ -20,7 +25,11 @@ if (Astro.request.method === "POST") {
 }
 ---
 
-{type !== null && !["ban", "mute", "block"].includes(type) ? <meta http-equiv="refresh" content={`0; url=/`} /> : null}
+{
+	type !== null && !["ban", "mute", "channelBlock", "role"].includes(type) ? (
+		<meta http-equiv="refresh" content={`0; url=/`} />
+	) : null
+}
 {
 	discordState !== null ? (
 		<meta
@@ -33,6 +42,7 @@ if (Astro.request.method === "POST") {
 <Layout title="Moulberry's bush">
 	<main>
 		<h1>Appeal form</h1>
+		<p set:html={error !== null ? "Error while submitting form:<br>" + error.replaceAll("\n", "<br>") : null} />
 		<form method="POST">
 			<label>
 				What type of punishment are you appealing?
@@ -40,19 +50,44 @@ if (Astro.request.method === "POST") {
 				<select name="punishmentType" required>
 					<option value="ban" {...type === "ban" ? { selected: true } : { disabled: true }}>Ban</option>
 					<option value="mute" {...type === "mute" ? { selected: true } : { disabled: true }}>Mute</option>
-					<option value="channelBlock" {...type === "block" ? { selected: true } : { disabled: true }}
+					<option value="channelBlock" {...type === "channelBlock" ? { selected: true } : { disabled: true }}
 						>Channel Block</option
 					>
+					<option value="role" {...type === "role" ? { selected: true } : { disabled: true }}>Punishment Role</option>
 				</select>
 			</label><br />
 
 			{
-				type === "block" ? (
+				type === "channelBlock" ? (
 					<>
 						<label>
 							What channel were you blocked from?
 							<br />
 							#<input name="blockedChannel" type="text" placeholder="neu-suggestions" required />
+						</label>
+						<br />
+					</>
+				) : null
+			}
+
+			{
+				type === "role" ? (
+					<>
+						<label>
+							What role were you given?
+							<br />@
+							<select name="role" required>
+								<option disabled selected>
+									Please select
+								</option>
+								<option value="Limited Server Access">Limited Server Access</option>
+								<option value="No Files">No Files</option>
+								<option value="No Reactions">No Reactions</option>
+								<option value="No Links">No Links</option>
+								<option value="No Giveaways">No Giveaways</option>
+								<option value="No Bots">No Bots</option>
+								<option value="No Threads">No Threads</option>
+							</select>
 						</label>
 						<br />
 					</>
@@ -72,7 +107,15 @@ if (Astro.request.method === "POST") {
 			</label><br />
 
 			<label>
-				Why should we reverse your {type === "ban" ? "ban" : type === "mute" ? "mute" : "channel block"}?
+				Why should we reverse your {
+					type === "ban"
+						? "ban"
+						: type === "mute"
+							? "mute"
+							: type === "channelBlock"
+								? "channel block"
+								: "punishment role"
+				}?
 				<br />
 				<textarea name="reasoning" required></textarea>
 			</label><br />

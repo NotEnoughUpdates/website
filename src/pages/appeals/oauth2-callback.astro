@@ -1,5 +1,5 @@
 ---
-import type { ActionError } from "astro:actions";
+import { Result } from "@sapphire/result";
 import Layout from "../../layouts/Layout.astro";
 import { validateForm } from "../../utils";
 
@@ -7,16 +7,25 @@ let error = null;
 
 const code = Astro.url.searchParams.get("code");
 const state = Astro.url.searchParams.get("state");
-const responses = state !== null ? validateForm(JSON.parse(atob(state))) : null;
+const responses = state !== null ? Result.from(() => JSON.parse(atob(state))).andThen(d => validateForm(d)) : null;
 const questionsMap = {
+	punishmentType: "What kind of punishment are you appealing?",
 	blockedChannel: "What channel were you blocked from?",
+	role: "What role were you given?",
 	punishmentReason: "Why were you given this punishment?",
 	fairness: "Do you believe this punishment was fair?",
 	reasoning: "Why should we reverse this punishment?"
 };
 
-if (code !== null && responses !== null) {
-	// Exchange code for discord access token
+const result = await Result.fromAsync(async () => {
+	if (code === null)
+		throw "Discord Oauth2 code was missing, unable to authenticate. This site should only be accessed through discord redirect.";
+	if (responses === null)
+		throw "Encoded state was missing, unable to decode responses. This site should only be accessed through discord redirect.";
+	const validResponses = responses.expect(
+		"Form responses were invalid, unable to submit. This site should only be accessed through discord redirect."
+	);
+
 	const accessTokenResponse = await fetch("https://discord.com/api/oauth2/token", {
 		method: "POST",
 		headers: {
@@ -31,80 +40,51 @@ if (code !== null && responses !== null) {
 		}).toString()
 	}).then(r => r.json());
 
-	if ("error" in accessTokenResponse) {
-		if (accessTokenResponse.error === "invalid_grant")
-			error =
-				"Your discord login was unable to be validated. This usually happens if the page is resubmitted by accident.";
-		else error = `Unknown discord code grant error: "${JSON.stringify(accessTokenResponse)}"`;
-	} else {
-		const bearerToken = accessTokenResponse.access_token;
-		const meResponse = await fetch("https://discord.com/api/oauth2/@me", {
-			method: "GET",
-			headers: {
-				Authorization: `Bearer ${bearerToken}`
-			}
-		}).then(r => r.json());
+	if (accessTokenResponse.error === "invalid_grant")
+		throw "Your discord login was unable to be validated. This usually happens if the page is resubmitted by accident.";
+	else if ("error" in accessTokenResponse)
+		throw `Unknown discord code grant error: "${JSON.stringify(accessTokenResponse)}"`;
 
-		if (import.meta.env.BANNED_IDS.split(",").includes(meResponse.user.id)) {
-			error = "Your discord account has been banned from making appeals";
-		} else {
-			// Submit the webhook
-			await fetch(import.meta.env.WEBHOOK_URL, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json"
-				},
-				body: JSON.stringify({
-					username: "New Punishment Appeal",
-					embeds: [
-						{
-							title: "New Appeal Form Entry",
-							type: "rich",
-							color: 0x0080ff,
-							fields: [
-								{
-									name: "What is your discord ID?",
-									value: meResponse.user.id
-								},
-								{
-									name: "What type of punishment are you appealing?",
-									value:
-										responses.punishmentType === "ban"
-											? "Ban"
-											: responses.punishmentType === "mute"
-												? "Mute"
-												: "Channel Block"
-								},
-								...(responses.punishmentType === "channelBlock"
-									? [
-											{
-												name: questionsMap.blockedChannel,
-												value: "#" + responses.blockedChannel
-											}
-										]
-									: []),
-								{
-									name: questionsMap.punishmentReason,
-									value: responses.punishmentReason
-								},
-								{
-									name: questionsMap.fairness,
-									value: responses.fairness
-								},
-								{
-									name: questionsMap.reasoning,
-									value: responses.reasoning
-								}
-							]
-						}
-					]
-				})
-			});
+	const bearerToken = accessTokenResponse.access_token;
+	const meResponse = await fetch("https://discord.com/api/oauth2/@me", {
+		method: "GET",
+		headers: {
+			Authorization: `Bearer ${bearerToken}`
 		}
-	}
-} else {
-	error = "Invalid URL parameters";
-}
+	}).then(r => r.json());
+	if (import.meta.env.BANNED_IDS.split(",").includes(meResponse.user.id))
+		throw "You have been banned from making appeals";
+
+	// Submit the webhook
+	await fetch(import.meta.env.WEBHOOK_URL, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json"
+		},
+		body: JSON.stringify({
+			username: "New Punishment Appeal",
+			embeds: [
+				{
+					title: "New Appeal Form Entry",
+					type: "rich",
+					color: 0x0080ff,
+					fields: [
+						{
+							name: "What is your discord ID?",
+							value: meResponse.user.id
+						},
+						...Object.entries(validResponses).map(([k, v]) => ({
+							name: questionsMap[k as keyof typeof validResponses],
+							value: v
+						}))
+					]
+				}
+			]
+		})
+	});
+});
+
+if (result.isErr()) error = String(result.unwrapErr());
 ---
 
 <Layout title="Form Confirmation">
@@ -122,8 +102,8 @@ if (code !== null && responses !== null) {
 				<>
 					<h1>Form Error</h1>
 					<p>
-						Your form was unable to be submitted due to an error. If you believe this to be unintentional,
-						please DM @t.y.y for assistance.
+						Your form was unable to be submitted due to an error. If you believe this to be unintentional, please DM
+						@t.y.y for assistance.
 						<>
 							<br />
 							<br />

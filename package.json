@@ -11,6 +11,7 @@
 	},
 	"dependencies": {
 		"@astrojs/check": "^0.8.1",
+		"@sapphire/result": "^2.6.6",
 		"astro": "^4.11.5",
 		"typescript": "^5.5.3",
 		"zod": "^3.23.8"
