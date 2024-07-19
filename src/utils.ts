@@ -1,5 +1,5 @@
 import { err, Result } from "@sapphire/result";
-import { z, ZodError } from "zod";
+import { z } from "zod";
 
 export function validateForm(data: unknown) {
 	return Result.from(() => {
