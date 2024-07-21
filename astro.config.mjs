@@ -7,5 +7,16 @@ export default defineConfig({
 	output: "hybrid",
 	adapter: node({
 		mode: "standalone"
-	})
+	}),
+	...(
+		process.env.NODE_ENV === "production"
+			? {
+				vite: {
+					ssr: {
+						noExternal: true
+					}
+				}
+			}
+			: null
+	)
 });
