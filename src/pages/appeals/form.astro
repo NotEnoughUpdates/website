@@ -41,7 +41,7 @@ if (Astro.request.method === "POST") {
 	discordState !== null ? (
 		<meta
 			http-equiv="refresh"
-			content={`0; url=https://discord.com/oauth2/authorize?client_id=${import.meta.env.CLIENT_ID}&response_type=code&redirect_uri=http%3A%2F%2F${encodeURIComponent(import.meta.env.REDIRECT_HOST)}%2Fappeals%2Foauth2-callback&scope=identify&state=${discordState}`}
+			content={`0; url=https://discord.com/oauth2/authorize?client_id=${import.meta.env.CLIENT_ID}&response_type=code&redirect_uri=${import.meta.env.REDIRECT_SCHEME}%3A%2F%2F${encodeURIComponent(import.meta.env.REDIRECT_HOST)}%2Fappeals%2Foauth2-callback&scope=identify&state=${discordState}`}
 		/>
 	) : null
 }

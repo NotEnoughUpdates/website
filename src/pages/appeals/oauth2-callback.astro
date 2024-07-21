@@ -36,7 +36,7 @@ const result = await Result.fromAsync(async () => {
 		body: new URLSearchParams({
 			grant_type: "authorization_code",
 			code,
-			redirect_uri: `http://${import.meta.env.REDIRECT_HOST}/appeals/oauth2-callback`,
+			redirect_uri: `${import.meta.env.REDIRECT_SCHEME}://${import.meta.env.REDIRECT_HOST}/appeals/oauth2-callback`,
 			client_id: import.meta.env.CLIENT_ID,
 			client_secret: import.meta.env.CLIENT_SECRET
 		}).toString()
