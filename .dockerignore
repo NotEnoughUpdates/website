@@ -32,11 +32,9 @@ pnpm-debug.log*
 !.yarn/sdks
 !.yarn/versions
 
-# custom
-.env
-.env.*
-
 # docker pointless files
 README.md
 .gitignore
 .vscode/*
+
+!.env.example

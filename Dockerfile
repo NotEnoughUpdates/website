@@ -4,7 +4,7 @@ WORKDIR /build
 COPY . /build/
 RUN corepack enable
 RUN yarn install --immutable
-RUN yarn build
+RUN export $(cat .env.example) && yarn build
 
 FROM node:22-alpine3.19 AS runner
 
