@@ -106,7 +106,15 @@ if (Astro.request.method === "POST") {
 			}
 
 			<label>
-				Why were you {type === "ban" ? "banned" : type === "mute" ? "muted" : "blocked from this channel"}?
+				Why were you {
+					type === "ban"
+						? "banned"
+						: type === "mute"
+							? "muted"
+							: type === "channelBlock"
+								? "blocked from this channel"
+								: "given this role"
+				}?
 				<br />
 				<textarea name="punishmentReason" required></textarea>
 			</label><br />
