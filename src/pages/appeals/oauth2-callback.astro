@@ -11,7 +11,7 @@ const code = Astro.url.searchParams.get("code");
 const state = Astro.url.searchParams.get("state");
 const responses = state !== null ? Result.from(() => JSON.parse(atob(state))).andThen(d => validateForm(d)) : null;
 const questionsMap = {
-	punishmentType: "What kind of punishment are you appealing?",
+	punishmentType: "What type of punishment are you appealing?",
 	blockedChannel: "What channel were you blocked from?",
 	role: "What role were you given?",
 	punishmentReason: "Why were you given this punishment?",
