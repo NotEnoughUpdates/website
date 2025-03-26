@@ -7,7 +7,7 @@
     };
 
     outputs = { self, nixpkgs, flake-utils, ... }:
-        flake-utils.lib.eachDefaultSystem (system: let pkgs = nixpkgs.legacyPackages.${system}; in {
+        (flake-utils.lib.eachDefaultSystem (system: let pkgs = nixpkgs.legacyPackages.${system}; in {
             devShells.default = pkgs.mkShell {
                 packages = with pkgs; [
                     nodejs_23
@@ -18,7 +18,7 @@
             packages.website = pkgs.callPackage ./nix/package.nix {
                 nodejs = pkgs.nodejs_23;
             };
-
-            nixosModules.default = ./nix/module.nix;
-        });
+        })) // {
+            nixosModules.default = import ./nix/module.nix { inherit self; };
+        };
 }
