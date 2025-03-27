@@ -34,3 +34,5 @@ pnpm-debug.log*
 
 # custom
 .env
+.direnv
+result
