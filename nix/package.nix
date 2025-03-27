@@ -11,7 +11,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     pname = "website";
     version = "1";
 
-    src = ./.;
+    src = ../.;
 
     nativeBuildInputs = [
         nodejs
