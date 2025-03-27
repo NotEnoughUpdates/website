@@ -77,11 +77,11 @@ self:
             };
 
             environment = {
-                PORT = builtins.toString cfg.port;
-                HOST = cfg.host;
-                REDIRECT_HOST = cfg.redirectHost;
-                REDIRECT_SCHEME = cfg.redirectScheme;
-                CLIENT_ID = builtins.toString cfg.clientId;
+                PORT = builtins.toString cfg.settings.port;
+                HOST = cfg.settings.host;
+                REDIRECT_HOST = cfg.settings.redirectHost;
+                REDIRECT_SCHEME = cfg.settings.redirectScheme;
+                CLIENT_ID = builtins.toString cfg.settings.clientId;
             };
         };
     };
