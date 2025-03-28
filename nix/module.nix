@@ -4,12 +4,7 @@ self:
     options.services.moulberry-bush-website = {
         enable = lib.mkEnableOption "moulbery bush website";
 
-        package = lib.mkOption {
-            description = "The package to use for the website";
-            default = null;
-            defaultText = "null";
-            type = lib.types.package;
-        };
+        package = lib.mkPackageOption self.packages.${config.nixpkgs.hostPlatform} "website" { };
 
         environmentFile = lib.mkOption {
             description = "An extra file containing environment variables to load (for secrets)";
