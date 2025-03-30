@@ -3,6 +3,7 @@
     stdenvNoCC,
     cacert,
     nodejs,
+    bash,
     yarn-berry,
     makeWrapper
 }:
@@ -90,7 +91,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
         cp -r ./dist/* $out/lib/
 
-        echo -e "#!/usr/bin/env sh\n${lib.getExe nodejs} $out/lib/server/entry.mjs" > $out/bin/website
+        echo -e "#!/usr/bin/env ${lib.getExe bash}\n${lib.getExe nodejs} $out/lib/server/entry.mjs" > $out/bin/website
         chmod +x $out/bin/website
 
         runHook postInstall
