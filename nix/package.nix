@@ -105,6 +105,9 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     '';
 
     meta = {
-        # TODO
+        description = "Moulberry's Bush Website";
+        homepage = "https://github.com/NotEnoughUpdates/website";
+        license = lib.licenses.cc0;
+        mainProgram = "website";
     };
 })

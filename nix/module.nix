@@ -65,7 +65,7 @@ self:
                 Group = "mbwebsite";
                 DynamicUser = "yes";
 
-                ExecStart = "${cfg.package}";
+                ExecStart = "${lib.getExe cfg.package}";
                 Restart = "on-failure";
 
                 EnvironmentFile = [ cfg.environmentFile ];
