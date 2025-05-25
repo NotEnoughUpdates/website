@@ -1,6 +1,9 @@
 ---
 export const prerender = false;
 
+import { CLIENT_ID, REDIRECT_SCHEME, REDIRECT_HOST } from "astro:env/server";
+
+import z from "zod";
 import Layout from "../../layouts/Layout.astro";
 import { validateForm } from "../../utils";
 import { Result } from "@sapphire/result";
@@ -18,7 +21,7 @@ if (Astro.request.method === "POST") {
 		if (typeof decodedData.punishmentType === "string") type = decodedData.punishmentType;
 		// Validate data
 		const validated = validateForm(decodedData).mapErr(zodError => {
-			const formatted = zodError.flatten();
+			const formatted = z.flattenError(zodError);
 			return `Validation error(s):${formatted.formErrors.map(formError => `\n- ${formError}`)}${Object.entries(formatted.fieldErrors).map(([key, fieldErrors]) => fieldErrors.map(fieldError => `\n- Error in ${key}: ${fieldError}`))}`;
 		});
 		if (validated.isErr()) throw validated.unwrapErr();
@@ -41,7 +44,7 @@ if (Astro.request.method === "POST") {
 	discordState !== null ? (
 		<meta
 			http-equiv="refresh"
-			content={`0; url=https://discord.com/oauth2/authorize?client_id=${import.meta.env.CLIENT_ID}&response_type=code&redirect_uri=${import.meta.env.REDIRECT_SCHEME}%3A%2F%2F${encodeURIComponent(import.meta.env.REDIRECT_HOST)}%2Fappeals%2Foauth2-callback&scope=identify&state=${discordState}`}
+			content={`0; url=https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT_SCHEME}%3A%2F%2F${encodeURIComponent(REDIRECT_HOST)}%2Fappeals%2Foauth2-callback&scope=identify&state=${discordState}`}
 		/>
 	) : null
 }

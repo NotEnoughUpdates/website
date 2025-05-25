@@ -21,13 +21,10 @@ export function validateForm(data: unknown) {
 				.object({
 					punishmentType: z.literal("channelBlock").transform(() => "Channel Block" as const),
 					blockedChannel: z
-						.string({
-							errorMap: (i, ctx) => ({
-								message:
-									i.code === "invalid_string" && i.validation === "regex" ? "Invalid channel name" : ctx.defaultError
-							})
+						.string()
+						.regex(/^[\w-]{1,100}$/, {
+							error: _ => "Invalid channel name"
 						})
-						.regex(/^[\w-]{1,100}$/)
 				})
 				.extend(base),
 			z

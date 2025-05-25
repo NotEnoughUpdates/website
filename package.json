@@ -10,16 +10,16 @@
 		"astro": "astro"
 	},
 	"dependencies": {
-		"@astrojs/check": "^0.8.1",
-		"@astrojs/node": "^8.3.2",
-		"@sapphire/result": "^2.6.6",
-		"astro": "^4.11.5",
-		"typescript": "^5.5.3",
-		"zod": "^3.23.8"
+		"@astrojs/check": "^0.9.4",
+		"@astrojs/node": "^9.3.0",
+		"@sapphire/result": "^2.7.2",
+		"astro": "^5.11.0",
+		"typescript": "^5.8.3",
+		"zod": "^4.0.0"
 	},
-	"packageManager": "yarn@4.3.1+sha512.af78262d7d125afbfeed740602ace8c5e4405cd7f4735c08feb327286b2fdb2390fbca01589bfd1f50b1240548b74806767f5a063c94b67e431aabd0d86f7774",
+	"packageManager": "yarn@4.9.1+sha512.f95ce356460e05be48d66401c1ae64ef84d163dd689964962c6888a9810865e39097a5e9de748876c2e0bf89b232d583c33982773e9903ae7a76257270986538",
 	"devDependencies": {
-		"prettier": "^3.3.3",
+		"prettier": "^3.6.2",
 		"prettier-plugin-astro": "^0.14.1"
 	},
 	"license": "CC0-1.0"
