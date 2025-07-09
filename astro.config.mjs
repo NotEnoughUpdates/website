@@ -14,7 +14,7 @@ export default defineConfig({
 			REDIRECT_HOST: envField.string({ context: "server", access: "secret" }),
 			CLIENT_ID: envField.string({ context: "server", access: "secret" }),
 			CLIENT_SECRET: envField.string({ context: "server", access: "secret" }),
-			BANNED_IDS: envField.string({ context: "server", access: "secret" }),
+			BANNED_IDS: envField.string({ context: "server", access: "secret", default: "" }),
 			WEBHOOK_URL: envField.string({ context: "server", access: "secret" })
 		}
 	},
