@@ -9,6 +9,9 @@ export default defineConfig({
 	adapter: node({
 		mode: "standalone"
 	}),
+	security: {
+		checkOrigin: false
+	},
 	env: {
 		schema: {
 			REDIRECT_SCHEME: envField.string({ context: "server", access: "secret" }),
