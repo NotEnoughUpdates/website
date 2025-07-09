@@ -4,6 +4,7 @@ import node from "@astrojs/node";
 
 // https://astro.build/config
 export default defineConfig({
+	site: "https://bush.notenoughupdates.org",
 	output: "static",
 	adapter: node({
 		mode: "standalone"
